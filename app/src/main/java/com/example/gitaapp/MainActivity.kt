@@ -34,6 +34,11 @@ import com.google.gson.reflect.TypeToken
 import java.io.IOException
 import java.util.*
 import kotlin.math.roundToInt
+import com.example.gitaapp.ui.theme.AppTypography
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.lightColorScheme
+
+
 
 
 // --- DATA MODELS ---
@@ -130,10 +135,10 @@ fun TopBar(
         title = {
             Text(
                 text = when (screen) {
-                    is Screen.Home -> "Bhagavad Gita"
-                    is Screen.Chapter -> "Chapters"
-                    is Screen.Verse -> "Verse"
-                    is Screen.Settings -> "Settings"
+                    is Screen.Home -> "Gita."
+                    is Screen.Chapter -> "Chapters."
+                    is Screen.Verse -> "Verse."
+                    is Screen.Settings -> "Settings."
                     else -> ""
                 }
             )
@@ -263,7 +268,7 @@ fun SearchBar(query: String, onQuery: (String) -> Unit) {
     OutlinedTextField(
         value = query,
         onValueChange = onQuery,
-        placeholder = { Text("Search chapters...") },
+        placeholder = { Text("Search chapters.") },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
@@ -271,10 +276,10 @@ fun SearchBar(query: String, onQuery: (String) -> Unit) {
             )
         },
         singleLine = true,
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp)
     )
 }
 
@@ -284,13 +289,25 @@ fun SearchBar(query: String, onQuery: (String) -> Unit) {
 fun ProgressBar(read: Int, total: Int) {
     if (total == 0) return
     val pct = ((read.toFloat() / total) * 100).roundToInt()
-    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
-        LinearProgressIndicator(progress = read / total.toFloat(), trackColor = MaterialTheme.colorScheme.secondaryContainer)
-        Text("$read of $total verses read ($pct%)", style = MaterialTheme.typography.bodySmall)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+        // This line centers the children horizontally
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LinearProgressIndicator(
+            progress = read / total.toFloat(),
+            trackColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+        Text(
+            text = "$read of $total verses read ($pct%)",
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }
 
-// --- DAILY VERSE ---
+
 fun selectDailyVerse(verses: List<Verse>): Verse = if (verses.isEmpty()) Verse(0,0,0,"...","...","...")
 else verses[Calendar.getInstance().get(Calendar.DAY_OF_YEAR)%verses.size]
 
@@ -301,9 +318,10 @@ fun DailyVerseCard(
     onTap: () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        //colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        //elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 16.dp)
@@ -314,11 +332,12 @@ fun DailyVerseCard(
                 .padding(20.dp)
         ) {
             Text(
-                text = "Verse of the Day",
+                text = "Verse of the Day.",
                 fontWeight = FontWeight.SemiBold,
                 fontSize = fontSize,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.primary
             )
+            Spacer(Modifier.height(8.dp))
             Text(
                 text = verse.text.take(160).trim(),
                 fontSize = fontSize,
@@ -334,8 +353,8 @@ fun DailyVerseCard(
 @Composable
 fun ChapterListItem(ch: Chapter, appState: AppState, onClick: ()->Unit, fontSize: TextUnit) {
     Card(
-        shape = RoundedCornerShape(22.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 7.dp),
+        shape = RoundedCornerShape(16.dp),
+        //elevation = CardDefaults.cardElevation(defaultElevation = 7.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
         modifier = Modifier
             .fillMaxWidth()
@@ -353,11 +372,19 @@ fun ChapterListItem(ch: Chapter, appState: AppState, onClick: ()->Unit, fontSize
             }
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text("Adhyaya ${ch.chapter_number}: ${ch.name_transliterated}",
-                    fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary, fontSize = fontSize)
-                Text(ch.name, fontStyle = FontStyle.Italic, color = MaterialTheme.colorScheme.secondary, fontSize = fontSize)
+                Text("${ch.name_transliterated}",
+                    fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary, fontSize = fontSize)
+                //Text(ch.name, fontStyle = FontStyle.Italic, color = MaterialTheme.colorScheme.secondary, fontSize = fontSize)
                 Spacer(Modifier.height(4.dp))
-                OutlinedCardChip("${ch.verses_count} verses", MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.secondary)
+                Row {
+                    Text(ch.name, fontStyle = FontStyle.Italic, color = MaterialTheme.colorScheme.primary, fontSize = 10.sp)
+                    Spacer(Modifier.width(8.dp))
+                    Text("|", color = MaterialTheme.colorScheme.primary,)
+                    Spacer(Modifier.width(8.dp))
+                    OutlinedCardChip("${ch.verses_count} verses", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondary)
+
+                }
+                //OutlinedCardChip("${ch.verses_count} verses", MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.secondary)
             }
             if (appState.isBookmarked(ch.id)) {
                 Icon(Icons.Default.Favorite, null, tint = Color.Red, modifier = Modifier.size(28.dp))
@@ -368,13 +395,7 @@ fun ChapterListItem(ch: Chapter, appState: AppState, onClick: ()->Unit, fontSize
 
 @Composable
 fun OutlinedCardChip(text: String, bg: Color, fg: Color) {
-    Surface(
-        color = bg,
-        contentColor = fg,
-        shape = RoundedCornerShape(18.dp),
-        border = BorderStroke(1.dp, fg),
-        modifier = Modifier.padding(top = 2.dp)
-    ) { Text(text, fontSize = 13.sp, modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)) }
+     Text(text, fontSize = 10.sp,)
 }
 
 // --- CHAPTER DETAIL SCREEN (Bountiful) ---
@@ -394,26 +415,27 @@ fun ChapterDetailScreen(
             .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 16.dp)
     ) {
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
         Text(
-            "अध्याय ${chapter.chapter_number}: ${chapter.name_meaning}",
+            "    अध्याय ${chapter.chapter_number}: ${chapter.name_meaning}",
             fontWeight = FontWeight.Bold, fontSize = fontSize,
             color = MaterialTheme.colorScheme.primary
         )
         Card(
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-            elevation = CardDefaults.cardElevation(4.dp),
+            //colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+           // elevation = CardDefaults.cardElevation(4.dp),
             modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)
         ) {
             Column(Modifier.padding(18.dp)) {
-                Text("Summary", fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.secondary)
-                Spacer(Modifier.height(3.dp))
+                Text("Summary", fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.height(8.dp))
                 Text(
                     chapter.chapter_summary,
                     style = MaterialTheme.typography.bodyLarge,
                     fontSize = fontSize,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
         }
@@ -451,7 +473,9 @@ fun VerseListItem(
 ) {
     Card(
         shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+
+        // elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         border = if (isRead) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
         modifier = Modifier
             .fillMaxWidth()
@@ -512,14 +536,15 @@ fun VerseDetailScreen(
         }
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 Card(
                     shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                    elevation = CardDefaults.cardElevation(8.dp),
+                    //colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                  //  elevation = CardDefaults.cardElevation(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(Modifier.padding(22.dp)) {
@@ -529,7 +554,7 @@ fun VerseDetailScreen(
                             verse.text.trim(),
                             fontWeight = FontWeight.Bold,
                             fontSize = fontSize,
-                            color = MaterialTheme.colorScheme.secondary
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     }
                 }
@@ -595,7 +620,7 @@ fun VerseDetailScreen(
 @Composable
 fun SectionHeader(text: String) {
     Surface(
-        color = MaterialTheme.colorScheme.secondary,
+        color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = Color.White,
         shape = RoundedCornerShape(24.dp),
         modifier = Modifier.padding(vertical = 8.dp)
@@ -616,13 +641,14 @@ fun InfoCard(title: String, content: String, fontSize: TextUnit) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-        elevation = CardDefaults.cardElevation(4.dp),
+        //colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+       // elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text(title, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.secondary)
+            Text(title, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.height(4.dp))
-            Text(content, fontSize = fontSize, fontStyle = FontStyle.Italic, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(content, fontSize = fontSize, fontStyle = FontStyle.Italic, color = MaterialTheme.colorScheme.onSecondaryContainer)
         }
     }
 }
@@ -631,12 +657,12 @@ fun InfoCard(title: String, content: String, fontSize: TextUnit) {
 fun AuthorCommentaryCard(author: String?, text: String, fontSize: TextUnit) {
     Card(
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        //elevation = CardDefaults.cardElevation(0.5.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(Modifier.padding(15.dp)) {
-            Text(author?.takeIf{it.isNotBlank()} ?: "Unknown Author", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text(author?.takeIf{it.isNotBlank()} ?: "Author", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.height(4.dp))
             Text(text.trim(), fontSize = fontSize, color = MaterialTheme.colorScheme.onBackground)
         }
@@ -691,23 +717,34 @@ fun SettingsScreen(fontSize: Float, onFontSizeChange: (Int)->Unit, onBack: ()->U
 fun BhagavadGitaTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = lightColorScheme(
-            // These are Material 3 defaults or only gently overridden;
-            // you can uncomment and set individual colors if you want!
-            // primary = MaterialTheme.colorScheme.primary,
-            // secondary = MaterialTheme.colorScheme.tertiary,
-            // background = MaterialTheme.colorScheme.background,
-        ),
-        typography = Typography(
-            titleLarge = MaterialTheme.typography.titleLarge.copy(
-                fontWeight = FontWeight.ExtraBold, fontSize = 22.sp),
-            titleMedium = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold, fontSize = 18.sp),
-            bodyLarge = MaterialTheme.typography.bodyLarge.copy(
-                fontSize = 16.sp),
-            bodyMedium = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = 15.sp)
-        ),
+            primary = Color(0xFF23272A),           // Elegant deep gray-blue for headline accents
+            onPrimary = Color.White,
+            primaryContainer = Color(0xFFE9EEF5),  // Airy, fresh blue-tinted off-white for cards/surfaces
+            onPrimaryContainer = Color(0xFF272C31),
+
+            secondary = Color(0xFFB5D0E6),         // Misty blue as a gentle highlight/accent
+            onSecondary = Color(0xFF22334A),
+            secondaryContainer = Color(0xFFF1F7FA),// Softest hint of cloud blue for chips/highlights
+            onSecondaryContainer = Color(0xFF53616C),
+
+            background = Color(0xFFF6F8FA),        // Balanced, exceptionally bright off-white background
+            onBackground = Color(0xFF23272A),      // Deep blue-gray for readability
+
+            surface = Color(0xFFFFFFFF),           // Radiant pure white for sheets/dialogs/cards
+            onSurface = Color(0xFF373D48),         // Gentle neutral gray for card text
+
+            surfaceVariant = Color(0xFFE6E8F0),    // Subtle cool gray for soft separation
+            onSurfaceVariant = Color(0xFF76808E),  // Muted blue-gray for details
+
+            outline = Color(0xFFD1D7DE),           // Ultra-light washed blue-gray for borders
+            error = Color(0xFFB00020)              // Standard, softened Material red
+        )
+
+
+
+
+        ,
+                typography = AppTypography,  // Use correct variable
         content = content
     )
 }
-
